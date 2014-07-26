@@ -82,7 +82,7 @@ def main():
     RR.RobotRaconteurNode.s.RegisterService("WheelChair","WheelChair_interface.WheelChair",obj)
 
     #Wait for the user to stop the server
-    raw_input("Server started, press enter to quit... use  w = RobotRaconteur.Connect('tcp://localhost:3400/{0}/WheelChair')")
+    raw_input("Server started... use  w = RobotRaconteur.Connect('tcp://localhost:3400/{0}/WheelChair')")
 
     #Shutdown
     obj.Shutdown()

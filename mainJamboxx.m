@@ -1,6 +1,7 @@
 % This is the main file for Jamboxx based control of Baxter.
 
 clear all; close all; clc;
+addpath('./functions');
 
 %% Robot Raconteur Connections
 
@@ -10,9 +11,8 @@ try
 catch err
     jointServerPort = input('Enter joint server port:');
 end
-bridgeIP = '192.168.1.102';
 try
-    baxterJ = RobotRaconteur.Connect(['tcp://',bridgeIP,':',num2str(jointServerPort),'/BaxterJointServer/Baxter']);
+    baxterJ = RobotRaconteur.Connect(['tcp://localhost:',num2str(jointServerPort),'/BaxterJointServer/Baxter']);
 catch err
     error(['ERROR:CANNOT CONNECT TO BAXTER JOINT SERVER: ',err.message]);
 end
@@ -24,13 +24,13 @@ catch err
     peripheralServerPort = input('Enter peripheral server port:');
 end
 try
-    baxterP = RobotRaconteur.Connect(['tcp://',bridgeIP,':',num2str(peripheralServerPort),'/BaxterPeripheralServer/BaxterPeripherals']);
+    baxterP = RobotRaconteur.Connect(['tcp://localhost:',num2str(peripheralServerPort),'/BaxterPeripheralServer/BaxterPeripherals']);
 catch err
     disp(['WARNING:CANNOT CONNECT TO BAXTER PERIPHERALS SERVER: ',err.message]);
 end
 
 % Jamboxx
-jamboxxIP = '192.168.1.107';
+jamboxxIP = '192.168.139.1';
 try
     jamboxx = RobotRaconteur.Connect(['tcp://',jamboxxIP,':5318/{0}/Jamboxx']);
 catch err
@@ -53,7 +53,7 @@ catch err
 end
 
 % Voice
-voiceObj = udp(jamboxxIP,9094,'LocalPort',9094);
+voiceObj = udp(jamboxxIP,9097,'LocalPort',9097);
 try
     fopen(voiceObj);
 catch err
@@ -72,7 +72,7 @@ end
 disp(' '); disp('Initializing robot...');
 moveToInitialPose(baxterJ);
 
-command = 'baxter wrist';
+command = 'baxter translate left';
 jamsterMode = 'baxterTransLeft';
 
 disp(' '); disp('Calibrating jamboxx!');
@@ -85,15 +85,21 @@ clc; disp('READY...');
 while(1) 
    
     if ~strcmp(voiceObj,'false')
-        command = readVoiceCommand(voiceObj);
+        command = readVoiceCommand(voiceObj,command);
         disp(command);
     end
     parsedCommand = splitstring(command);
     [jamsterMode,grip_L,grip_R] = determineMode(parsedCommand,w,baxterJ);
+    
     if strcmp(parsedCommand{1},'wheelchair')
-        baxterJ.control_mode('wheelchair');
-    else
-        baxterJ.control_mode('baxter');
+        baxterJ.SetControlMode('wheelchair');
+    elseif strcmp(parsedCommand{1},'baxter') && (strcmp(parsedCommand{2},'translate')||strcmp(parsedCommand{2},'rotate'))
+	if strcmp(parsedCommand{3},'left');
+	    baxterJ.SetActiveArm('left');
+        elseif strcmp(parsedCommand{3},'right');
+	    baxterJ.SetActiveArm('right');
+	end
+	baxterJ.SetControlMode('baxter');
     end
 
     % Gather joint information

@@ -13,17 +13,17 @@ function [linVel_L,linVel_R,angVel_L,angVel_R,wristVel_L,wristVel_R] = getUserIn
             x = 0;
         end
 
-        if y > 0.2
-            y = limitVal(0.1,0.7,y)*-0.1;
-        elseif y < -0.2
-            y = limitVal(-0.7,-0.1,y)*-0.1;
-        else
-            y = 0;
-        end
+	if y > 0.15
+	   y = limitVal(0.5,0.5,y)*-0.1;
+	elseif y < -0.15
+	   y = limitVal(-0.5,-0.5,y)*-0.1;
+	else
+	   y = 0;
+	end
 
         if air > 0.1
             air = limitVal(0.1,0.7,air)*0.1;
-        elseif air < -0.1
+        elseif air < -0.01
             air = limitVal(-0.7,-0.1,air)*0.1;
         else
             air = 0;
@@ -34,7 +34,7 @@ function [linVel_L,linVel_R,angVel_L,angVel_R,wristVel_L,wristVel_R] = getUserIn
     linVel_R = [0;0;0];
     angVel_L = [0;0;0];
     angVel_R = [0;0;0];
-    wristVel_L = [];
+    wristVel_L = [];y > 0.1
     wristVel_R = [];
 
     switch jamsterMode
@@ -65,13 +65,28 @@ function [linVel_L,linVel_R,angVel_L,angVel_R,wristVel_L,wristVel_R] = getUserIn
                     xInput = 127;
                     yInput = 127;
                 end
-            end
-            w.Drive(uint8(xInput),int8(-1));
-            w.Drive(uint8(yInput),int8(1));
+            else
+		xInput = 127;
+		yInput = 127;
+	    end
+            w.Drive(uint8(xInput),int8(1));
+            w.Drive(uint8(yInput),int8(-1));
         case 'baxterTransLeft'
-            linVel_L = [air;x;y];
+	    if (y == 0.05 || y == -0.05) && (air > 0.01) 
+		linVel_L = [0;0;air];
+	    elseif (y == 0.05 || y == -0.05) && (air < -0.01)
+		linVel_L = [0;0;air];
+	    else
+		linVel_L = [air;x;0];
+	    end
         case 'baxterTransRight'
-            linVel_R = [air;x;y];
+	    if (y == 0.05 || y == -0.05) && (air > 0.01)
+		linVel_R = [0;0;air];
+	    elseif (y == 0.05 || y == -0.05) && (air < -0.01)
+	 	linVel_R = [0;0;air];
+	    else
+		linVel_R = [air;x;0];
+	    end
         case 'baxterRotLeft'
             angVel_L = [air;y;x];
         case 'baxterRotRight'
