@@ -6,10 +6,13 @@ import thread
 import threading
 import numpy
 import traceback
+import socket
+import time
+import sys
 
 # w = RobotRaconteur.Connect('tcp://localhost:3400/{0}/WheelChair')
 #Port names and NodeID of this service
-serial_port_name="/dev/ttyACM0"
+serial_port_name="/dev/ttyACM1"
 #This NodeID must be different for every instance.  Change this to a new value.
 wheelChair_nodeid="{8519ee12-eb36-4f72-b434-4284f7dba8e8}"
 
@@ -26,6 +29,15 @@ end object
 """
 
 
+
+def get_open_port():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.bind(('127.0.0.1', 0))
+    port = sock.getsockname()
+    sock.close()
+    time.sleep(3)
+    return port[1]
+
 class WheelChair_impl(object):
     def __init__(self):
         self._lock=threading.RLock()
@@ -38,8 +50,6 @@ class WheelChair_impl(object):
             if axis == 1:
                 dat=struct.pack("BB",50,value)
                 self._serial.write(dat)
-	    print value
-	    print axis
 
     def Stop(self):
         with self._lock:
@@ -52,9 +62,21 @@ class WheelChair_impl(object):
 
     def Init(self, port):
         with self._lock:
-            self._serial=serial.Serial(port="/dev/ttyACM0",baudrate=115200)
-            
-
+	    done = False
+            index = 0
+            while not done:
+		if index > 50:
+                    print "Arduino not connected or you need to run chmod!"
+		    sys.exit(0)
+                try:
+                    self._serial=serial.Serial(port="/dev/ttyACM" + str(index),baudrate=115200)
+		    done = True
+                except:
+                    index+=1
+                    done = False
+            print "Connected to /dev/ttyACM" + str(index)
+            serial_port_name = "/dev/ttyACM" + str(index)
+		     
 
 def main():
 
@@ -69,12 +91,20 @@ def main():
     obj=WheelChair_impl()
     obj.Init(serial_port_name)
 
-
+    port = get_open_port()
+    print "Accepting commands on port:" + str(port)
 
     #Create the transport, register it, and start the server
     t=RR.TcpTransport()
     RR.RobotRaconteurNode.s.RegisterTransport(t)
-    t.StartServer(3400) #random port, any unused port is fine
+
+ 
+    #Share ports through folders
+    f = open('/home/cats/Jamster/wheelchairServer.txt', 'w')
+    f.write(str(port))
+    f.close()
+
+    t.StartServer(port) #random port, any unused port is fine
     t.EnableNodeAnnounce(RR.IPNodeDiscoveryFlags_NODE_LOCAL | RR.IPNodeDiscoveryFlags_LINK_LOCAL | RR.IPNodeDiscoveryFlags_SITE_LOCAL)
 
     #Register the service type and the service
@@ -82,7 +112,9 @@ def main():
     RR.RobotRaconteurNode.s.RegisterService("WheelChair","WheelChair_interface.WheelChair",obj)
 
     #Wait for the user to stop the server
-    raw_input("Server started... use  w = RobotRaconteur.Connect('tcp://localhost:3400/{0}/WheelChair')")
+    i = 0
+    while 1==1:
+	i+=1
 
     #Shutdown
     obj.Shutdown()

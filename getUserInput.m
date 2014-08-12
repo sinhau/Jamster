@@ -23,7 +23,7 @@ function [linVel_L,linVel_R,angVel_L,angVel_R,wristVel_L,wristVel_R] = getUserIn
 
         if air > 0.1
             air = limitVal(0.1,0.7,air)*0.1;
-        elseif air < -0.01
+        elseif air < -0.1
             air = limitVal(-0.7,-0.1,air)*0.1;
         else
             air = 0;
@@ -72,20 +72,24 @@ function [linVel_L,linVel_R,angVel_L,angVel_R,wristVel_L,wristVel_R] = getUserIn
             w.Drive(uint8(xInput),int8(1));
             w.Drive(uint8(yInput),int8(-1));
         case 'baxterTransLeft'
-	    if (y == 0.05 || y == -0.05) && (air > 0.01) 
+	    if (y ~= 0 && air ~= 0) 
 		linVel_L = [0;0;air];
-	    elseif (y == 0.05 || y == -0.05) && (air < -0.01)
-		linVel_L = [0;0;air];
+	    elseif (x ~= 0 && air ~= 0)
+		linVel_L = [0;sign(air)*x;0];
+	    elseif (x == 0 && air ~= 0)
+		linVel_L = [air;0;0];
 	    else
-		linVel_L = [air;x;0];
+		linVel_L = [0;0;0];
 	    end
         case 'baxterTransRight'
-	    if (y == 0.05 || y == -0.05) && (air > 0.01)
+	    if (y ~= 0 && air ~= 0)
 		linVel_R = [0;0;air];
-	    elseif (y == 0.05 || y == -0.05) && (air < -0.01)
-	 	linVel_R = [0;0;air];
+	    elseif (x ~= 0 && air ~= 0)
+		linVel_R = [0;sign(air)*x;0];
+	    elseif (x == 0 && air ~= 0)
+		linVel_R = [air;0;0];
 	    else
-		linVel_R = [air;x;0];
+		linVel_R = [0;0;0];
 	    end
         case 'baxterRotLeft'
             angVel_L = [air;y;x];

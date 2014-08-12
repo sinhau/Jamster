@@ -46,10 +46,9 @@ end
 
 % Wheelchair
 try
-    wheelchairPort = textread('wheelchairServer.txt');
+    wheelchairPort = textread('wheelchairServer.txt')
 catch err
-    wheelchairPort = input('Enter wheelchair RR server port: ');
-end
+    wheelchairPort = input('Enter wheelchair RR server port: '');
 try
     w = RobotRaconteur.Connect(['tcp://localhost:',num2str(wheelchairPort),'/{0}/WheelChair']);
 catch err
