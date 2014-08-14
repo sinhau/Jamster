@@ -47,8 +47,10 @@ function [jamsterMode,grip_L,grip_R] = determineMode(command,w,baxterJ)
         case 'stop'
             %w.Stop();
             moveToInitialPose(baxterJ);
+	    jamsterMode = 'baxterTransLeft';
         case 'pose'
             moveToInitialPose(baxterJ);
+	    jamsterMode = 'baxterTransLeft';
         otherwise
     end
 

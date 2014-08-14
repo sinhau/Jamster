@@ -34,7 +34,7 @@ function [linVel_L,linVel_R,angVel_L,angVel_R,wristVel_L,wristVel_R] = getUserIn
     linVel_R = [0;0;0];
     angVel_L = [0;0;0];
     angVel_R = [0;0;0];
-    wristVel_L = [];y > 0.1
+    wristVel_L = [];
     wristVel_R = [];
 
     switch jamsterMode
@@ -43,7 +43,7 @@ function [linVel_L,linVel_R,angVel_L,angVel_R,wristVel_L,wristVel_R] = getUserIn
                 if (x > -0.4) && (x < 0.4)
                     xInput = 127;
                     yInput = 142.222*air + 112.778;
-                    yInput = limitVal(127,255,yInput);
+                    yInput = limitVal(0,127,255-yInput);
                 elseif x > 0.4
                     xInput = -141.111*air + 141.111;
                     xInput = limitVal(0,127,xInput);
@@ -60,7 +60,15 @@ function [linVel_L,linVel_R,angVel_L,angVel_R,wristVel_L,wristVel_R] = getUserIn
                 if (x > -0.4) && (x < 0.4)
                     xInput = 127;
                     yInput = 141.111*air + 141.111;
-                    yInput = limitVal(0,127,yInput);
+                    yInput = limitVal(127,255,255-yInput);
+		elseif x > 0.4
+		    xInput = 142.222*air + 112.778;
+  		    xInput = limitVal(127,255,xInput);
+                    yInput = 127;
+		elseif x < -0.4
+		    xInput = -141.111*air + 141.111;
+		    xInput = limitVal(0,127,xInput);
+		    yInput = 127;
                 else
                     xInput = 127;
                     yInput = 127;

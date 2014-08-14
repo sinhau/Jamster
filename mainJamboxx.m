@@ -58,7 +58,7 @@ catch err
 end
 
 % Voice
-voiceObj = udp(jamboxxIP,9097,'LocalPort',9097);
+voiceObj = udp(jamboxxIP,9098,'LocalPort',9098);
 try
     fopen(voiceObj);
 catch err
@@ -169,7 +169,7 @@ while(1)
         end
     end
 
-   pause(0.1); 
+   pause(0.1);clc; 
 
 end
 
