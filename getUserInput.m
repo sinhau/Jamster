@@ -62,11 +62,11 @@ function [linVel_L,linVel_R,angVel_L,angVel_R,wristVel_L,wristVel_R] = getUserIn
                     yInput = 141.111*air + 141.111;
                     yInput = limitVal(127,255,255-yInput);
 		elseif x > 0.4
-		    xInput = 142.222*air + 112.778;
+		    xInput = 142.222*-air + 112.778;
   		    xInput = limitVal(127,255,xInput);
                     yInput = 127;
 		elseif x < -0.4
-		    xInput = -141.111*air + 141.111;
+		    xInput = -141.111*-air + 141.111;
 		    xInput = limitVal(0,127,xInput);
 		    yInput = 127;
                 else
